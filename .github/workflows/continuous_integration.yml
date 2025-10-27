@@ -9,13 +9,15 @@ on:
 jobs:
   ci:
     runs-on: ubuntu-latest
-    # Define o nome da imagem como uma variável de ambiente para o job
-    env:
-      IMAGE_NAME: ${{ toLowerCase(github.repository) }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      # NOVO PASSO PARA CORRIGIR O NOME DA IMAGEM
+      - name: Prepare image name in lowercase
+        id: string_converter
+        run: echo "image_name=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -48,14 +50,14 @@ jobs:
           context: .
           file: ./dockerfile 
           push: false
-          # CORREÇÃO: Usa a variável de ambiente com o nome em minúsculas
-          tags: ${{ env.IMAGE_NAME }}:ci-test
+          # CORREÇÃO: Usa a variável de saída do passo 'string_converter'
+          tags: ${{ steps.string_converter.outputs.image_name }}:ci-test
 
       - name: Trivy security scan
         uses: aquasecurity/trivy-action@0.24.0
         with:
-          # CORREÇÃO: Usa a mesma variável para referenciar a imagem
-          image-ref: ${{ env.IMAGE_NAME }}:ci-test
+          # CORREÇÃO: Usa a mesma variável de saída
+          image-ref: ${{ steps.string_converter.outputs.image_name }}:ci-test
           format: 'table'
           exit-code: '1'
           severity: 'CRITICAL'
