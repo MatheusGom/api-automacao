@@ -41,7 +41,8 @@ jobs:
           echo "Executando linters e testes..."
           # Os pacotes já estão instalados, então apenas executamos
           ruff check src tests
-          mypy src tests
+          # CORREÇÃO: Analisa 'tests' que importará 'src' e evitará o conflito
+          mypy tests
           # Pytest agora encontrará 'src.app'
           pytest -v tests/
 
