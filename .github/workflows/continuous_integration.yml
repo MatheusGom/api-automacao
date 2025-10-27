@@ -9,6 +9,9 @@ on:
 jobs:
   ci:
     runs-on: ubuntu-latest
+    # Define o nome da imagem como uma variável de ambiente para o job
+    env:
+      IMAGE_NAME: ${{ toLowerCase(github.repository) }}
 
     steps:
       - name: Checkout repository
@@ -23,41 +26,36 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/pip
-          # Atualizei a chave para usar apenas requirements.txt
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
 
       - name: Install dependencies
-        # Agora instala tudo, incluindo pytest, httpx, etc.
         run: pip install -r requirements.txt
 
       - name: Lint, Type-Check & Test
-        # AQUI ESTÁ A CORREÇÃO PRINCIPAL:
-        # Adiciona a raiz do projeto (onde 'src' está) ao PYTHONPATH
         env:
           PYTHONPATH: .
         run: |
           echo "Executando linters e testes..."
-          # Os pacotes já estão instalados, então apenas executamos
           ruff check src tests
-          # CORREÇÃO: Analisa 'tests' que importará 'src' e evitará o conflito
           mypy tests
-          # Pytest agora encontrará 'src.app'
           pytest -v tests/
 
       - name: Build Docker image (Validation only)
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: ./dockerfile # Especifica o caminho do Dockerfile
+          file: ./dockerfile 
           push: false
-          tags: ${{ github.repository }}:ci-test
+          # CORREÇÃO: Usa a variável de ambiente com o nome em minúsculas
+          tags: ${{ env.IMAGE_NAME }}:ci-test
 
       - name: Trivy security scan
         uses: aquasecurity/trivy-action@0.24.0
         with:
-          image-ref: ${{ github.repository }}:ci-test
+          # CORREÇÃO: Usa a mesma variável para referenciar a imagem
+          image-ref: ${{ env.IMAGE_NAME }}:ci-test
           format: 'table'
           exit-code: '1'
-          severity: 'CRITICAL' # Falha apenas em vulnerabilidades críticas
+          severity: 'CRITICAL'
