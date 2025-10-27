@@ -40,8 +40,8 @@ jobs:
         run: |
           echo "Executando linters e testes..."
           # Os pacotes já estão instalados, então apenas executamos
-          ruff check src/ tests/
-          mypy src/ tests/
+          ruff check src tests
+          mypy src tests
           # Pytest agora encontrará 'src.app'
           pytest -v tests/
 
