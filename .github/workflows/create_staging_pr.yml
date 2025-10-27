@@ -1,0 +1,37 @@
+name: Create Staging Pull Request
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  create-pull-request:
+    runs-on: ubuntu-latest
+    # Adiciona permissão para criar Pull Requests
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create Pull Request from dev to staging
+        run: |
+          # Verifica se já existe um PR aberto de dev para staging
+          EXISTING_PR=$(gh pr list --base staging --head dev --state open --json number -q '.[0].number')
+
+          if [ -n "$EXISTING_PR" ]; then
+            echo "Pull Request de 'dev' para 'staging' já existe: #$EXISTING_PR"
+          else
+            echo "Criando novo Pull Request de 'dev' para 'staging'..."
+            gh pr create \
+              --base staging \
+              --head dev \
+              --title "Sync: dev -> staging" \
+              --body "Este PR foi gerado automaticamente para sincronizar o branch 'staging' com as últimas atualizações do 'dev'."
+          fi
+        env:
+          # O GITHUB_TOKEN é necessário para autenticar o GitHub CLI
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
