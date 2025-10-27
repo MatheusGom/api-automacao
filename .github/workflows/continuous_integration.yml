@@ -40,10 +40,10 @@ jobs:
         run: |
           echo "Executando linters e testes..."
           # Os pacotes já estão instalados, então apenas executamos
-          ruff check .
-          mypy .
+          ruff check src/ tests/
+          mypy src/ tests/
           # Pytest agora encontrará 'src.app'
-          pytest -v
+          pytest -v tests/
 
       - name: Build Docker image (Validation only)
         uses: docker/build-push-action@v6
