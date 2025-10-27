@@ -1,0 +1,37 @@
+{
+  "family": "api-automacao-task",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "256",
+  "memory": "512",
+  "executionRoleArn": "arn:aws:iam::268015775476:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::268015775476:role/ecsTaskExecutionRole",
+  "containerDefinitions": [
+    {
+      "name": "api-automacao-container",
+      "image": "268015775476.dkr.ecr.us-east-1.amazonaws.com/api-automacao:latest",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 8080,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        { "name": "APP_ENV", "value": "production" },
+        { "name": "APP_NAME", "value": "api-starter" },
+        { "name": "APP_PORT", "value": "8080" },
+        { "name": "LOG_LEVEL", "value": "INFO" },
+        { "name": "PONG_VALUE", "value": "World" }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/api-automacao",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    }
+  ]
+}
