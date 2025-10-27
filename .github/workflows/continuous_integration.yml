@@ -52,15 +52,12 @@ jobs:
           context: .
           file: ./dockerfile # Especifica o caminho do Dockerfile
           push: false
-          # CORREÇÃO: Corrigido toLower para toLower
-          tags: ${{ toLower(github.repository) }}:ci-test
+          tags: ${{ github.repository }}:ci-test
 
       - name: Trivy security scan
         uses: aquasecurity/trivy-action@0.24.0
         with:
-          # CORREÇÃO: Corrigido toLower para toLower
-          image-ref: ${{ toLower(github.repository) }}:ci-test
+          image-ref: ${{ github.repository }}:ci-test
           format: 'table'
           exit-code: '1'
           severity: 'CRITICAL' # Falha apenas em vulnerabilidades críticas
-
